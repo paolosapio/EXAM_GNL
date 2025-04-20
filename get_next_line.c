@@ -1,57 +1,59 @@
 /*
-En este gnl os quiero contar una historia que ha cambiado la vida de muchas personas y ha marcado 
-un pueblo que desesperado ha sabido hacer valer su creatividad en escapando a otro pais evitando 
-las miliaciones del nazismo durante la segunda guerra mundial:
-los immigrantes del sur de italia en NY a principios de la década de 1900.
-Por seguridad los USA querian controlar las familia completas antes de desembarcarlas en NY,
-asi que amontonavan los immigrantes en Ellis Island (la actual isla de la estatua de la libertad).
-Y solamente si la familia estaba entera le daban derecho a un trabajo
-y el visado para desembarcar en NY en busqueda del sueno americano.
-Los caracteres son  los familiares el salto de linea o el '/0'
-representan el capofamilia que cierra una familia completa para finalmente
-desembarcar en NY hacia la liberta y lejos de guerras.
+En este GNL os quiero contar una historia que ha cambiado la vida de muchas
+personas y ha marcado a un pueblo que, desesperado, supo hacer valer su
+creatividad escapando a otro país, evitando las humillaciones del nazismo
+durante la Segunda Guerra Mundial: los inmigrantes del sur de Italia en
+Nueva York a principios del siglo XX.
 
-espero os guste la analogia aplicada en este maravilloso propyecto
+Por seguridad, EE.UU. quería controlar a las familias completas antes de
+desembarcarlas en NY, así que amontonaban a los inmigrantes en Ellis Island
+(la actual isla de la Estatua de la Libertad). Y solamente si la familia
+estaba completa se les daba el derecho a un trabajo y el visado para
+desembarcar en NY en búsqueda del sueño americano.
+
+Los caracteres son los familiares; el salto de línea o el '\0' representan
+al capofamilia que cierra una familia completa para finalmente desembarcar
+en NY hacia la libertad y lejos de las guerras.
+
+Espero que os guste la analogía aplicada a este maravilloso proyecto:
 https://es.wikipedia.org/wiki/Inmigraci%C3%B3n_italiana_en_Estados_Unidos
 */
-#include <fcntl.h> //open, closed
+#include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <stdbool.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
-#define ASIENTOS_BARCO      100
-#define SICILIA_VACIA       0
-#define FAMILIA_COMPLETA    '\n'
-#define NEW_LINE	        1
+#define ASIENTOS_BARCO BUFFER_SIZE
+#define BROKEN_BOAT -1
 
-typedef int t_fd;
-
-int len_0_n(char *str, bool len_nl)
+# ifndef BUFFER_SIZE
+#  define BUFFER_SIZE 42
+# endif
+// Devuelve longitud hasta \n si len_nl es true, o hasta \0 si false
+int	len_0_n(char *str, bool len_nl)
 {
-	int i;
-
-	i = 0;
-	while(str[i])
+	int i = 0;
+	if (!str)
+		return (0);
+	while (str[i])
 	{
 		if (len_nl && str[i] == '\n')
-		{
-			return (i + 1);
-		}
+			return (i + 1); // incluido el '\n'
 		i++;
 	}
 	return (i);
 }
 
-char *ft_join(char *s1, char *s2)
+char	*ft_join(char *s1, char *s2)
 {
-	char *joined;
-	int i;
-	int j;
+	int		len_s1 = len_0_n(s1, 0);
+	int		len_s2 = len_0_n(s2, 0);
+	char	*joined;
+	int		i;
+	int		j;
 
-	if (!s1 && !s2)
-		return (NULL);
-	joined = malloc(len_0_n(s1, 0) + len_0_n(s2, 0) + 1);
+	joined = malloc(len_s1 + len_s2 + 1);
 	if (!joined)
 		return (NULL);
 	i = 0;
@@ -63,21 +65,24 @@ char *ft_join(char *s1, char *s2)
 	j = 0;
 	while (s2 && s2[j])
 	{
-		joined[i++] = s2[j++];
+		joined[i + j] = s2[j];
+		j++;
 	}
-	joined[i] = '\0';
+	joined[i + j] = '\0';
+	if (s1)
+		free(s1); // libero s1 porque ya está copiado
 	return (joined);
 }
 
-char    *ft_strchr(const char *s, int c)
+char	*ft_strchr(const char *s, int c)
 {
-	int	i;
+	int	i = 0;
+
 	if (!s)
 		return (NULL);
 	if (c == '\0')
 		return ((char *)&s[len_0_n((char *)s, 0)]);
-	i = 0;	
-	while (s && s[i])
+	while (s[i])
 	{
 		if (s[i] == (char)c)
 			return ((char *)&s[i]);
@@ -86,96 +91,96 @@ char    *ft_strchr(const char *s, int c)
 	return (NULL);
 }
 
+// Separa la primera línea de ellis_island y actualiza ellis_island con el resto
 char	*split_family(char **ellis_island)
 {
-	// printf("ELLIS entrando en split[%s]\n", *ellis_island);
-	char	*family;
-	char	*people;
-	int len_family = len_0_n(*ellis_island, FAMILIA_COMPLETA) + 1;
-	int len_people = len_0_n(*ellis_island, 0) - len_0_n(*ellis_island, FAMILIA_COMPLETA) + 1;
-	int i;
-	int j;
+	int		len_line = len_0_n(*ellis_island, true);
+	int		len_rest = len_0_n(*ellis_island, false) - len_line;
+	char	*line = malloc(len_line + 1);
+	char	*rest = malloc(len_rest + 1);
+	int		i = 0;
+    int     j = 0;
 
-	family = malloc(len_family + 1);
-	people = malloc(len_people + 1);
-	i = 0;
-	while ((*ellis_island)[i] != '\0')
+	if (!line || !rest)
+		return (free(line), free(rest), NULL);
+	while (i < len_line)
 	{
-		if ((*ellis_island)[i] == '\n')
+		line[i] = (*ellis_island)[i];
+		i++;
+	}
+	line[i] = '\0';
+	while ((*ellis_island)[i])
+		rest[j++] = (*ellis_island)[i++];
+	rest[j] = '\0';
+	free(*ellis_island);
+	*ellis_island = rest;
+	return (line);
+}
+
+char	*get_next_line(int sicily_fd)
+{
+	static char	*ellis_island = NULL;
+	char		*boat;
+	char		*family;
+	int			captain_report;
+
+	if (sicily_fd < 0)
+		return (NULL);
+	boat = malloc(ASIENTOS_BARCO + 1);
+	if (!boat)
+		return (NULL);
+	while (ft_strchr(ellis_island, '\n') == NULL)
+	{
+		captain_report = read(sicily_fd, boat, ASIENTOS_BARCO);
+		if (captain_report <= 0)
 		{
-			family[i] = (*ellis_island)[i];
-			i++;
+			if (captain_report == -1)
+			{
+				free(boat);
+				free(ellis_island);
+				return (NULL);
+			}
 			break ;
 		}
-		family[i] = (*ellis_island)[i];
-		i++;
+		boat[captain_report] = '\0';
+		ellis_island = ft_join(ellis_island, boat);
+		if (!ellis_island)
+			return (free(boat), NULL);
 	}
-	family[i] = '\0';
-	j = 0;
-	while ((*ellis_island)[i] != '\0')
+	free(boat);
+	if (!ellis_island || ellis_island[0] == '\0')
 	{
-		people[j] = (*ellis_island)[i];
-		i++;
-		j++;
+		free(ellis_island);
+		ellis_island = NULL;
+		return (NULL);
 	}
-	people[j] = '\0';
-	// printf("family is: %s", family);
-	// printf("people is: %s\n", people);
-	*ellis_island = ft_join("", people);
-	free(people);
+	if (ft_strchr(ellis_island, '\n')) // Última línea sin '\n' — copia y liberar
+		return (split_family(&ellis_island));
+	int len = len_0_n(ellis_island, false);
+	if (len == 0)
+		return (free(ellis_island), ellis_island = NULL, NULL);
+	family = malloc(len + 1);
+	if (!family)
+		return (free(ellis_island), ellis_island = NULL, NULL);
+	for (int i = 0; i < len; i++)
+		family[i] = ellis_island[i];
+	family[len] = '\0';
+	free(ellis_island);
+	ellis_island = NULL;
 	return (family);
 }
 
-char *get_next_line(t_fd sicily)
-{
-	char        *boat;
-	static char *ellis_island = NULL;
-	char        *trip_to_ny;
-	int         captan_report;
-	char		*aux;
-
-	if (sicily < 0)
-		return (NULL);
-	if (ellis_island == NULL)
-	{
-		ellis_island = malloc(1);
-		*ellis_island = '\0';
-	}
-	boat = malloc(ASIENTOS_BARCO + 1);
-	while (ft_strchr(ellis_island, '\n') == NULL) // mientras no hay salto de linea
-	{
-		captan_report = read(sicily, boat, ASIENTOS_BARCO);
-		if(captan_report <= 0)
-		break ;
-		boat[captan_report] = '\0';
-		aux = ellis_island;
-		ellis_island = ft_join(ellis_island, boat);
-		free(aux);
-		if (ft_strchr(ellis_island, '\n') != NULL)
-		{
-			trip_to_ny = split_family(&ellis_island);
-			return (trip_to_ny);
-		}
-	}
-	free(boat);
-	return (split_family(&ellis_island));
-}
-
-int main(void)
-{
-	int		fd;
-	char	*line;
-	int		i;
-
-	i = 1;                                                              
-	fd = open("testo.txt", O_RDONLY);
-	line = get_next_line(fd);
-	while(line)
-	{
-		printf("line %d: %s", i++, line);
-		free(line);
-		line = get_next_line(fd);
-	}
-	close(fd);
-	return (0);
-}
+// int	main(void)
+// {
+// 	int		fd = open("testo.txt", O_RDONLY);
+// 	char	*line;
+// 	int		i = 1;
+  
+// 	while ((line = get_next_line(fd)) != NULL)
+// 	{
+// 		printf("line %d: %s", i++, line);
+// 		free(line);
+// 	}
+// 	close(fd);
+// 	return (0);
+// }
