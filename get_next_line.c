@@ -14,7 +14,7 @@ desembarcar en NY hacia la liberta y lejos de guerras.
 espero os guste la analogia aplicada en este maravilloso propyecto
 https://es.wikipedia.org/wiki/Inmigraci%C3%B3n_italiana_en_Estados_Unidos
 */
-
+#include <fcntl.h> //open, closed
 #include <stdio.h>
 #include <unistd.h>
 #include <stdbool.h>
@@ -88,6 +88,7 @@ char    *ft_strchr(const char *s, int c)
 
 char	*split_family(char **ellis_island)
 {
+	// printf("ELLIS entrando en split[%s]\n", *ellis_island);
 	char	*family;
 	char	*people;
 	int len_family = len_0_n(*ellis_island, FAMILIA_COMPLETA) + 1;
@@ -100,19 +101,16 @@ char	*split_family(char **ellis_island)
 	i = 0;
 	while ((*ellis_island)[i] != '\0')
 	{
-		family[i] = (*ellis_island)[i];
-		printf("test desde split: %s\n", family);
 		if ((*ellis_island)[i] == '\n')
 		{
 			family[i] = (*ellis_island)[i];
-			printf("sato linea\n");
 			i++;
 			break ;
 		}
+		family[i] = (*ellis_island)[i];
 		i++;
 	}
 	family[i] = '\0';
-	printf("test desde split: %s\n", family);
 	j = 0;
 	while ((*ellis_island)[i] != '\0')
 	{
@@ -120,9 +118,11 @@ char	*split_family(char **ellis_island)
 		i++;
 		j++;
 	}
-	family[j] = '\0';
-	printf("family is: %s", family);
-	printf("people is: %s\n", people);
+	people[j] = '\0';
+	// printf("family is: %s", family);
+	// printf("people is: %s\n", people);
+	*ellis_island = ft_join("", people);
+	free(people);
 	return (family);
 }
 
@@ -142,49 +142,40 @@ char *get_next_line(t_fd sicily)
 		*ellis_island = '\0';
 	}
 	boat = malloc(ASIENTOS_BARCO + 1);
-	while (ft_strchr(ellis_island, '\n') == NULL)
+	while (ft_strchr(ellis_island, '\n') == NULL) // mientras no hay salto de linea
 	{
 		captan_report = read(sicily, boat, ASIENTOS_BARCO);
 		if(captan_report <= 0)
 		break ;
 		boat[captan_report] = '\0';
 		aux = ellis_island;
-		printf("ellis es antes join: %s\n", ellis_island);
 		ellis_island = ft_join(ellis_island, boat);
-		printf("ellis es despues join: %s\n", ellis_island);
 		free(aux);
 		if (ft_strchr(ellis_island, '\n') != NULL)
 		{
 			trip_to_ny = split_family(&ellis_island);
-			// free(family_and_people[0]);
-			// free(family_and_people[1]);
-			// free(family_and_people);
 			return (trip_to_ny);
 		}
 	}
 	free(boat);
-	return (trip_to_ny);
+	return (split_family(&ellis_island));
 }
-
-#include <fcntl.h>
 
 int main(void)
 {
-	int fd;
-	char *line;
-	int i = 1;
+	int		fd;
+	char	*line;
+	int		i;
+
+	i = 1;                                                              
 	fd = open("testo.txt", O_RDONLY);
 	line = get_next_line(fd);
-	// while(line)
-	// {
-	// 	printf("line %d: %s", i++, line);
-	// 	line = get_next_line(fd);
-	// 	if (i == 5)
-	// 		break ;
-	// }
-	printf("line %d: %s", i++, line);
-	// printf("line %d: %s", i, get_next_line(fd));
+	while(line)
+	{
+		printf("line %d: %s", i++, line);
+		free(line);
+		line = get_next_line(fd);
+	}
 	close(fd);
-	free(line);
 	return (0);
 }
