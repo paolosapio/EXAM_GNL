@@ -18,18 +18,26 @@ en NY hacia la libertad y lejos de las guerras.
 Espero que os guste la analogía aplicada a este maravilloso proyecto:
 https://es.wikipedia.org/wiki/Inmigraci%C3%B3n_italiana_en_Estados_Unidos
 */
-#include <fcntl.h>
+
+#include <fcntl.h> //open, closed
 #include <stdio.h>
 #include <unistd.h>
-#include <stdlib.h>
 #include <stdbool.h>
+#include <stdlib.h>
+
+#define SICILIA_VACIA       0
+#define BROKEN_BOAT			-1
+#define FAMILIA_COMPLETA    '\n'
+#define NEW_LINE	        1
+
+typedef int t_fd;
 
 #define ASIENTOS_BARCO BUFFER_SIZE
-#define BROKEN_BOAT -1
 
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 42
 # endif
+
 // Devuelve longitud hasta \n si len_nl es true, o hasta \0 si false
 int	len_0_n(char *str, bool len_nl)
 {
@@ -117,21 +125,21 @@ char	*split_family(char **ellis_island)
 	return (line);
 }
 
-char	*get_next_line(int sicily_fd)
+char	*get_next_line(t_fd sicily)
 {
 	static char	*ellis_island = NULL;
 	char		*boat;
 	char		*family;
 	int			captain_report;
 
-	if (sicily_fd < 0)
+	if (sicily < 0)
 		return (NULL);
 	boat = malloc(ASIENTOS_BARCO + 1);
 	if (!boat)
 		return (NULL);
 	while (ft_strchr(ellis_island, '\n') == NULL)
 	{
-		captain_report = read(sicily_fd, boat, ASIENTOS_BARCO);
+		captain_report = read(sicily, boat, ASIENTOS_BARCO);
 		if (captain_report <= 0)
 		{
 			if (captain_report == -1)
