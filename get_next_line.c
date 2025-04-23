@@ -82,18 +82,18 @@ char	*ft_join(char *s1, char *s2)
 	return (joined);
 }
 
-char	*ft_strchr(const char *s, int c)
+char	*ft_strchr(char *s, char c)
 {
 	int	i = 0;
 
 	if (!s)
 		return (NULL);
 	if (c == '\0')
-		return ((char *)&s[len_0_n((char *)s, 0)]);
+		return (&s[len_0_n(s, 0)]);
 	while (s[i])
 	{
-		if (s[i] == (char)c)
-			return ((char *)&s[i]);
+		if (s[i] == c)
+			return (&s[i]);
 		i++;
 	}
 	return (NULL);
@@ -125,6 +125,8 @@ char	*split_family(char **ellis_island)
 	return (line);
 }
 
+#include <unistd.h>
+
 char	*get_next_line(t_fd sicily)
 {
 	static char	*ellis_island = NULL;
@@ -146,6 +148,7 @@ char	*get_next_line(t_fd sicily)
 			{
 				free(boat);
 				free(ellis_island);
+				ellis_island = NULL;
 				return (NULL);
 			}
 			break ;
@@ -164,31 +167,26 @@ char	*get_next_line(t_fd sicily)
 	}
 	if (ft_strchr(ellis_island, '\n')) // Última línea sin '\n' — copia y liberar
 		return (split_family(&ellis_island));
-	int len = len_0_n(ellis_island, false);
-	if (len == 0)
-		return (free(ellis_island), ellis_island = NULL, NULL);
-	family = malloc(len + 1);
-	if (!family)
-		return (free(ellis_island), ellis_island = NULL, NULL);
-	for (int i = 0; i < len; i++)
-		family[i] = ellis_island[i];
-	family[len] = '\0';
-	free(ellis_island);
+	char *temp = ellis_island;
 	ellis_island = NULL;
-	return (family);
+	return (temp);
 }
 
-// int	main(void)
-// {
-// 	int		fd = open("testo.txt", O_RDONLY);
-// 	char	*line;
-// 	int		i = 1;
+int	main(void)
+{
+	int		fd;
+	char	*line;
+	int		i = 1;
   
-// 	while ((line = get_next_line(fd)) != NULL)
-// 	{
-// 		printf("line %d: %s", i++, line);
-// 		free(line);
-// 	}
-// 	close(fd);
-// 	return (0);
-// }
+    fd = open("testo.txt", O_RDONLY);
+    line = get_next_line(fd);
+	while (line != NULL)
+	{
+		printf("line %d: %s", i++, line);
+		free(line);
+        line = get_next_line(fd);
+	}
+    free(line);
+	close(fd);
+	return (0);
+}
