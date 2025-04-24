@@ -6,7 +6,7 @@
 #include <stdbool.h>
 
 # ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 42
+#  define BUFFER_SIZE 1000
 # endif
 
 //Funciones a hacer
@@ -60,7 +60,84 @@ char	*join_str(char *str1, char *str2)
 	return (joined);
 }
 
-char 	*split_store(char	**store)
+
+
+char *split_store(char **original_store)
+{
+	char	*store = *original_store;
+	printf("store: %s\n", store);
+
+	char	*line_to_return;
+	char	*new_store;
+
+	int		size_line_to_return;
+	int		size_new_store;
+
+	int i;
+	int j;
+
+	size_line_to_return = len_n_0(store, true);
+	line_to_return = malloc(size_line_to_return + 1);
+
+	size_new_store = len_n_0(store, false) - size_line_to_return;
+	new_store = malloc(size_new_store + 1);
+	i = 0;
+	while(store[i] != '\0')
+	{
+
+		line_to_return[i] = store[i];
+		i++;
+		if (store[i] == '\n')
+		{
+			i++;
+			break ;
+		}
+	}
+	line_to_return[i] = '\0';
+	j = 0;
+	while(store[i + j] != '\0')
+	{
+		new_store[j] = store[i + j];
+		j++;
+	}
+	new_store[j] = '\0';
+	free(store);
+	*original_store = new_store;
+	return (NULL);
+}
+
+/* char 	*split_store(char **store)
+{
+	printf("store es: %s\n", *store);
+	char	*line_to_return;
+	char	*new_store;
+	int		len_to_nl;
+	int		i;
+	
+	printf("antes %s\n", *store);
+	if (*store == NULL)
+		return (NULL);
+	len_to_nl = len_n_0(*store, true);
+	write(1, *store, len_to_nl);
+	(*store)[len_to_nl] = '\0';
+	line_to_return = *store;
+	new_store = malloc(len_n_0(&store[0][len_to_nl + 1], false) + 1);
+	if (!new_store)
+		return (NULL);
+	i = 0;
+	while (i < len_n_0(&store[0][len_to_nl + 1], false))
+	{
+		new_store[i] = store[0][len_to_nl + 1 + i];
+		i++;
+	}
+	new_store[i] = '\0';
+	free(*store);
+	*store = new_store;
+	printf("despues %s\n", *store);
+	return (line_to_return);
+} */
+
+/* char 	*split_store(char	**store)
 {
 	char	*line_to_return;
 	char	*new_store;
@@ -70,14 +147,9 @@ char 	*split_store(char	**store)
 	i = 0;
 	if (store == NULL)
 		return (NULL);
-
-
 	len_to_nl = len_n_0(*store, true);
-	*store[len_to_nl] = '\0';
-	line_to_return = *store;
-	len_to_nl(store[len_to_nl]);
-	
-	while( != '\0')
+	line_to_return = malloc(len_to_nl + 1);
+	while(**store != '\0')
 	{
 		line_to_return[i] = **store;
 		if(**store == '\n')
@@ -90,37 +162,12 @@ char 	*split_store(char	**store)
 	}
 	line_to_return[len_to_nl] = '\0';
 	return (line_to_return);
-}
-
-// char 	*split_store(char	**store)
-// {
-// 	char	*line_to_return;
-// 	char	*new_store;
-// 	int		len_to_nl;
-// 	int		i;
-
-// 	i = 0;
-// 	if (store == NULL)
-// 		return (NULL);
-// 	len_to_nl = len_n_0(*store, true);
-// 	line_to_return = malloc(len_to_nl + 1);
-// 	while(**store != '\0')
-// 	{
-// 		line_to_return[i] = **store;
-// 		if(**store == '\n')
-// 		{
-// 			(*store)++;
-// 			break ;
-// 		}
-// 		(*store)++;
-// 		i++;
-// 	}
-// 	line_to_return[len_to_nl] = '\0';
-// 	return (line_to_return);
-// }
+} */
 
 bool	is_nl(char	*str)
 {
+	if (str == NULL)
+		return (false);
 	int i;
 
 	i = 0;
@@ -158,12 +205,12 @@ char	*get_next_line(int fd)
 				return (NULL);
 			}
 			break ;
-			aux = store;
-			store = join_str(store, buffer);
-			free(aux);
 		}
+		aux = store;
+		store = join_str(store, buffer);
+		free(aux);
 	}
-	return_line = //extraer la linea con el salto de linea y actualizar el store sin la linea devuelta;
+	return_line = split_store(&store);
 	return (return_line);
 }
 
