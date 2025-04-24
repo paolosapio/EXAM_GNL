@@ -9,7 +9,6 @@
 #  define BUFFER_SIZE 1000
 # endif
 
-//Funciones a hacer
 int		len_n_0(char *str, bool is_nl)
 {
 	int i;
@@ -100,8 +99,8 @@ char *split_store(char **original_store)
 	new_store[j] = '\0';
 	free(store);
 	*original_store = new_store;
-	printf("line_to_return: %s\n", line_to_return);
-	printf("original_store: %s\n", *original_store);
+	// printf("line_to_return: %s\n", line_to_return);
+	// printf("original_store: %s\n", *original_store);
 	return (line_to_return);
 }
 
@@ -156,7 +155,7 @@ char	*get_next_line(int fd)
 	return_line = split_store(&store);
 	return (return_line);
 }
-
+/* 
 int	main(void)
 {
 	char	*line;
@@ -180,3 +179,4 @@ int	main(void)
 	close(fd);
 	return (0);
 }
+ */
