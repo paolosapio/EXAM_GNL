@@ -5,7 +5,7 @@
 #include <fcntl.h>
 
 #ifndef BUFFER_SIZE
-# define BUFFER_SIZE 1
+# define BUFFER_SIZE 200
 #endif
 
 //devuelve len de str hasta el nl incluido
@@ -69,17 +69,26 @@ char	*ft_join(char *store, char *buffer)
 
 char	*extract_nl(char *store)
 {
-	char	*new_store;
+	char	*new_line;
 	int		i = 0;
+	int		len_new_line = 0;
 
-	new_store = malloc(len_nl(store) + 1);
+	if (store)
+		len_new_line = len_nl(store);
+
+	new_line = malloc(len_new_line + 1);
 	while (store[i])
 	{
-		new_store[i] = store[i];
+		new_line[i] = store[i];
+		if (store[i] == '\n')
+		{
+			i++;
+			break ;
+		}
 		i++;
 	}
-	new_store[i] = '\0';
-	return (new_store);
+	new_line[i] = '\0';
+	return (new_line);
 }
 
 char	*refresh_store(char *store)
@@ -87,8 +96,8 @@ char	*refresh_store(char *store)
 	char	*new_store;
 	int		len_to_nl;
 	int		i = 0;
-	len_to_nl = len_nl(store);
 
+	len_to_nl = len_nl(store);
 	new_store = malloc(ft_strlen(store) - len_to_nl + 1);
 	while(store[len_to_nl + i])
 	{
@@ -96,7 +105,6 @@ char	*refresh_store(char *store)
 		i++;
 	}
 	new_store[i] = '\0';
-	// printf("new_store is[%s]\n", new_store);
 	return (new_store);
 }
 
@@ -128,7 +136,6 @@ char	*get_next_line(int fd)
 			store = ft_join(store, buffer);
 			free(aux);
 		}
-	//extraer lina desde store si hay salto de linea:
 	if (len_nl(store))
 	{
 		line = extract_nl(store);
@@ -144,12 +151,10 @@ char	*get_next_line(int fd)
 		store = NULL;
 		return (line);
 	}
-	// printf("line es:[%s]\n", line);
-
 	return (NULL);
 }
 
-int main (void)
+/* int main (void)
 {
 	char	*line;
 	int		fd;
@@ -166,4 +171,4 @@ int main (void)
 	printf("%d	[%s]\n", count_line++, line);
 	close(fd);
 	return (0);
-}
+} */
